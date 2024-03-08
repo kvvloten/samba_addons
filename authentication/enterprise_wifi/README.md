@@ -40,10 +40,11 @@ Use of valid certificates is important to ensure secure authentication while a n
 A simple CA is good enough to create valid certificates for each server, for example [EasyRSA](https://github.com/OpenVPN/easy-rsa) can be used.
  
 The setup involves:
-1. Freeradius
-2. Wifi Access Point
-3. Client - Windows 10 
-4. Client - Linux 
+1. Samba
+2. Freeradius
+3. Wifi Access Point
+4. Client - Windows 10 
+5. Client - Linux 
 
 The aim is to be able to automate everything. Therefore manual actions, especially in UIs, are avoided. 
 The instructions below are an extracted from Ansible code.
@@ -51,7 +52,15 @@ The instructions below are an extracted from Ansible code.
 
 ## Setup steps
 
-### 1. Freeradius
+### 1. Samba
+
+Make sure `/etc/samba/smb.conf` contains `ntlm auth = mschapv2-and-ntlmv2-only` in the `[global]` section on the 
+machine that will run freeradius.
+
+On my systems this setting is also applied on the domain-controllers, not sure whether that is required or not. 
+
+
+### 2. Freeradius
 
 - Install freeradius:
 
@@ -122,9 +131,9 @@ mschap {
     ntlm_auth = "/usr/bin/ntlm_auth --allow-mschapv2 --request-nt-key \
                  --domain=${NETBIOS_DOMAIN} \
                  --require-membership-of=${NETBIOS_DOMAIN}\${PERMISSION_GROUP} \
-                 {% raw %}--username=%{%{mschap:User-Name}:-00} \
+                 --username=%{%{mschap:User-Name}:-00} \
                  --challenge=%{%{mschap:Challenge}:-00} \
-                 --nt-response=%{%{mschap:NT-Response}:-00}{% endraw %}"
+                 --nt-response=%{%{mschap:NT-Response}:-00}"
 
     pool {
         start = ${thread[pool].start_servers}
@@ -191,7 +200,7 @@ freeradius -X
 ```
 
 
-### 2. Wifi Access Point
+### 3. Wifi Access Point
 
 On the Wifi access point:
 - Wireless Security Mode: WPA2-Enterprise
@@ -202,7 +211,7 @@ On the Wifi access point:
 Out of scope for this setup, i.e. leave unconfigured: NAS-ID, NAS-PORT, NAS-IP, Radius Accounting
 
 
-### 3. Client - Windows 10 
+### 4. Client - Windows 10 
 
 Ensure Windows can validate the certificate used by Freeradius, e.g. import the CA-certificate:
 
