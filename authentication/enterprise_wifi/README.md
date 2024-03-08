@@ -40,7 +40,7 @@ Use of valid certificates is important to ensure secure authentication while a n
 A simple CA is good enough to create valid certificates for each server, for example [EasyRSA](https://github.com/OpenVPN/easy-rsa) can be used.
  
 The setup involves:
-1. Samba
+1. Samba domain-controllers
 2. Freeradius
 3. Wifi Access Point
 4. Client - Windows 10 
@@ -52,12 +52,10 @@ The instructions below are an extracted from Ansible code.
 
 ## Setup steps
 
-### 1. Samba
+### 1. Samba domain-controllers
 
-Make sure `/etc/samba/smb.conf` contains `ntlm auth = mschapv2-and-ntlmv2-only` in the `[global]` section on the 
-machine that will run freeradius.
-
-On my systems this setting is also applied on the domain-controllers, not sure whether that is required or not. 
+Make sure `/etc/samba/smb.conf` contains `ntlm auth = mschapv2-and-ntlmv2-only` in the `[global]` section on  
+the Samba domain-controllers.
 
 
 ### 2. Freeradius
